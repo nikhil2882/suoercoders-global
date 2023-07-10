@@ -4,7 +4,7 @@ const fs = require("fs");
 function readFileAfterTime(time, callback) {
   return new Promise(function (resolve, reject) {
     setTimeout(function () {
-      fs.readFile("./serverr.js", "utf8", function (err, data) {
+      fs.readFile("./server.js", "utf8", function (err, data) {
         if (err) {
           if (typeof callback === "function") {
             callback(err);
@@ -23,18 +23,48 @@ function readFileAfterTime(time, callback) {
 
 readFileAfterTime(2000)
   .then(function (data) {
+    console.log("first");
+    return rejectPromiseAfterTime(2000);
+  })
+  .then(function (data) {
+    console.log("second");
+    return readFileAfterTime(8000);
+  })
+  .then(function (data) {
+    console.log("second");
+    return rejectPromiseAfterTime(8000);
+  })
+  .then(function (data) {
     console.log("data", data);
   })
   .catch(function (err) {
     console.log("error", err);
   });
 
-console.log("khatam");
+function rejectPromiseAfterTime(time) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(function () {
+      reject(new Error("rejected"));
+    }, time);
+  });
+}
 
-readFileAfterTime(2000, function (e, d) {
-  if (e) {
-    console.log("error", e);
-    return;
+/* readFileAfterTime(2000, function (err, data) {
+  if (err) {
+    readFileAfterTime(2000, function (err, data) {
+      if (err) {
+        readFileAfterTime(2000, function (err, data) {
+          if (err) {
+          } else {
+            console.log("data", data);
+          }
+        });
+      } else {
+        console.log("data", data);
+      }
+    });
+  } else {
+    console.log("data", data);
   }
-  console.log("data", d);
 });
+ */

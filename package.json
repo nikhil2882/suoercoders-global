@@ -5,7 +5,8 @@
   "main": "test.js",
   "scripts": {
     "test": "npm test",
-    "start": "node test.js"
+    "start": "node test.js",
+    "start:Prod": "NODE_ENV=production node enviroment.js"
   },
   "author": "nikhil",
   "license": "MIT",
