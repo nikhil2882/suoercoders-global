@@ -1,0 +1,43 @@
+Arguments: 
+  /usr/local/bin/node /usr/local/bin/yarn add jest
+
+PATH: 
+  /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.16.1
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: EACCES: permission denied, mkdir '/Users/nikhilsengar/Desktop/Programming/playground/node/hello world/node_modules/@types/graceful-fs'
+
+npm manifest: 
+  {
+    "name": "hello-node",
+    "version": "0.0.1",
+    "description": "i dont know",
+    "main": "test.js",
+    "scripts": {
+      "test": "npm test",
+      "start": "node test.js",
+      "start:Prod": "NODE_ENV=production node enviroment.js"
+    },
+    "author": "nikhil",
+    "license": "MIT",
+    "dependencies": {
+      "area-of-square": "^1.0.1",
+      "express": "^4.18.2",
+      "socket.io": "^4.7.1"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

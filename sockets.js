@@ -10,6 +10,11 @@ const socketServer = new Server(server);
 
 const userBase = require("./userBase/users");
 
+// middlewares
+app.use(function (req, res, next) {
+  next();
+});
+
 // express solves routing and middleware problems for developers
 app.get("/", function (req, res) {
   /* fs.readFile("./public/index.html", function (err, data) {
@@ -19,6 +24,7 @@ app.get("/", function (req, res) {
   }); */
 
   // alternative in express
+  console.log(req.comesAt);
   res.sendFile(__dirname + "/public/index.html");
 });
 
@@ -46,6 +52,8 @@ socketServer.on("connection", function (socket) {
   socket.on("connect user", updateConnectedUsers(socket));
 
   socket.on("update user", function (userData) {
+    console.log("first");
+    console.log("first");
     updateConnectedUsersName(socket, userData);
   });
 
@@ -73,6 +81,7 @@ function updateConnectedUsers(socket) {
 }
 
 function updateConnectedUsersName(socket, userData) {
+  console.log(userData);
   const userName = userData.userName;
 
   userBase.updateUser(userName, userData);

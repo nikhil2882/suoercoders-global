@@ -1,8 +1,9 @@
 const userNames = {};
 
-function setUserNames(socket, userName) {
+function setUserNames(socket, user) {
+  const userName = user.data.userName;
   userNames[userName] = {
-    data: { userName: userName },
+    data: { userName: userName, nickName: user.data.nickName },
     connection: socket,
   };
 
