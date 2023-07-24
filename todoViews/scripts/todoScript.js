@@ -35,6 +35,8 @@ submitTodoNode.addEventListener("click", function () {
     if (response.status === 200) {
       // display todo in UI
       showTodoInUI(todo);
+    } else if (response.status === 401) {
+      window.location.href = "/login";
     } else {
       alert("something weird happened");
     }
@@ -56,6 +58,8 @@ fetch("/todo-data")
   .then(function (response) {
     if (response.status === 200) {
       return response.json();
+    } else if (response.status === 401) {
+      window.location.href = "/login";
     } else {
       alert("something weird happened");
     }
