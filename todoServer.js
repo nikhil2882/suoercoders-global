@@ -4,6 +4,11 @@ var session = require("express-session");
 
 const app = express();
 
+app.set("view engine", "ejs");
+
+// uncomment this line to change the default views directory
+//app.set("views", __dirname + "/todoViews");
+
 app.use(
   session({
     secret: "meinkyunbataun",
@@ -11,6 +16,11 @@ app.use(
     saveUninitialized: true,
   })
 );
+
+app.use(function (req, res, next) {
+  console.log(req.method, req.url);
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,12 +30,13 @@ app.get("/", function (req, res) {
     res.redirect("/login");
     return;
   }
-  res.sendFile(__dirname + "/todoViews/index.html");
+  res.render("index", { username: req.session.username });
 });
 
 app.post("/todo", function (req, res) {
   if (!req.session.isLoggedIn) {
-    res.status(401).send("error");
+    //res.status(401).send("error");
+    res.redirect("/login");
     return;
   }
 
@@ -85,7 +96,7 @@ app.get("/todoScript.js", function (req, res) {
 });
 
 app.get("/login", function (req, res) {
-  res.sendFile(__dirname + "/todoViews/login.html");
+  res.render("login", { error: null });
 });
 
 app.post("/login", function (req, res) {
@@ -99,7 +110,7 @@ app.post("/login", function (req, res) {
     return;
   }
 
-  res.status(401).send("error");
+  res.render("login", { error: "Invalid username or password" });
 });
 
 app.listen(3000, function () {

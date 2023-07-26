@@ -32,6 +32,7 @@ submitTodoNode.addEventListener("click", function () {
     },
     body: JSON.stringify(todo),
   }).then(function (response) {
+    console.log(response);
     if (response.status === 200) {
       // display todo in UI
       showTodoInUI(todo);
