@@ -42,13 +42,22 @@
     </style>
   </head>
   <body>
-    <form action="/login" method="post">
-      <h2>Login</h2>
+    <form action="/signup" method="post" enctype="multipart/form-data">
+      <h2>Signup</h2>
       <label for="username">Username:</label>
       <input type="text" id="username" name="username" required />
       <label for="password">Password:</label>
       <input type="password" id="password" name="password" required />
-      <input type="submit" value="Submit" />
+
+      <label for="pic">Profile Photo:</label>
+      <input type="file" id="pic" name="pic" required />
+
+      <% if(error) { %>
+      <p style="color: red"><%= error %></p>
+      <% } %>
+
+      <input type="submit" value="Signup" />
     </form>
+    <a href="/login">Login</a>
   </body>
 </html>

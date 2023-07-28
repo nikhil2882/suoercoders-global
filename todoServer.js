@@ -1,6 +1,22 @@
 const express = require("express");
 const fs = require("fs");
 var session = require("express-session");
+const multer = require("multer");
+
+const multerStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, callback) {
+    if (true) {
+      callback("error");
+      return;
+    }
+    callback(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage: multerStorage });
 
 const app = express();
 
@@ -25,12 +41,23 @@ app.use(function (req, res, next) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(express.static("todoViews"));
+app.use(express.static("uploads"));
+
+// single means only one file can be uploaded
+// array means multiple files can be uploaded
+// "pic" is the name of the field in the form
+app.use(upload.single("pic"));
+
 app.get("/", function (req, res) {
   if (!req.session.isLoggedIn) {
     res.redirect("/login");
     return;
   }
-  res.render("index", { username: req.session.username });
+  res.render("index", {
+    username: req.session.username,
+    profilePic: req.session.profilePic,
+  });
 });
 
 app.post("/todo", function (req, res) {
@@ -72,7 +99,7 @@ app.get("/about", function (req, res) {
     res.redirect("/login");
     return;
   }
-  res.sendFile(__dirname + "/todoViews/about.html");
+  res.render("about", { username: req.session.username });
 });
 
 app.get("/contact", function (req, res) {
@@ -91,8 +118,29 @@ app.get("/todo", function (req, res) {
   res.sendFile(__dirname + "/todoViews/todo.html");
 });
 
-app.get("/todoScript.js", function (req, res) {
-  res.sendFile(__dirname + "/todoViews/scripts/todoScript.js");
+app.get("/signup", function (req, res) {
+  res.render("signup", { error: null });
+});
+
+app.post("/signup", function (req, res) {
+  const username = req.body.username;
+  const password = req.body.password;
+  const profilePic = req.file;
+
+  const user = {
+    username: username,
+    password: password,
+    profilePic: profilePic.filename,
+  };
+
+  saveUser(user, function (err) {
+    if (err) {
+      res.render("signup", { error: "Something went wrong" });
+      return;
+    }
+
+    res.redirect("/login");
+  });
 });
 
 app.get("/login", function (req, res) {
@@ -103,14 +151,26 @@ app.post("/login", function (req, res) {
   const username = req.body.username;
   const password = req.body.password;
 
-  if (username === "n" && password === "n") {
-    req.session.isLoggedIn = true;
-    req.session.username = username;
-    res.redirect("/");
-    return;
-  }
+  getAllUsers(function (err, data) {
+    if (err) {
+      res.render("login", { error: "Something went wrong" });
+      return;
+    }
 
-  res.render("login", { error: "Invalid username or password" });
+    const user = data.find(function (user) {
+      return user.username === username && user.password === password;
+    });
+
+    if (user) {
+      req.session.isLoggedIn = true;
+      req.session.username = username;
+      req.session.profilePic = user.profilePic;
+      res.redirect("/");
+      return;
+    }
+
+    res.render("login", { error: "Invalid username or password" });
+  });
 });
 
 app.listen(3000, function () {
@@ -154,5 +214,45 @@ function saveTodoInFile(todo, callback) {
 
       callback(null);
     });
+  });
+}
+
+function saveUser(user, callback) {
+  getAllUsers(function (err, data) {
+    if (err) {
+      callback(err);
+      return;
+    }
+
+    data.push(user);
+
+    fs.writeFile("./users.apk", JSON.stringify(data), function (err) {
+      if (err) {
+        callback(err);
+        return;
+      }
+
+      callback(null);
+    });
+  });
+}
+
+function getAllUsers(callback) {
+  fs.readFile("./users.apk", "utf-8", function (err, data) {
+    if (err) {
+      callback(err);
+      return;
+    }
+
+    if (data.length === 0) {
+      data = "[]";
+    }
+
+    try {
+      data = JSON.parse(data);
+      callback(null, data);
+    } catch (err) {
+      callback([]);
+    }
   });
 }
