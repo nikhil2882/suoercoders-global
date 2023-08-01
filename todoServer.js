@@ -3,16 +3,15 @@ const fs = require("fs");
 var session = require("express-session");
 const multer = require("multer");
 
+const db = require("./models/db");
+const UserModel = require("./models/User");
+
 const multerStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
   filename: function (req, file, callback) {
-    if (true) {
-      callback("error");
-      return;
-    }
-    callback(null, file.originalname);
+    callback(null, Date.now() + "-" + file.originalname);
   },
 });
 
@@ -133,14 +132,22 @@ app.post("/signup", function (req, res) {
     profilePic: profilePic.filename,
   };
 
-  saveUser(user, function (err) {
+  UserModel.create(user)
+    .then(function () {
+      res.redirect("/login");
+    })
+    .catch(function (err) {
+      res.render("signup", { error: err });
+    });
+
+  /* saveUser(user, function (err) {
     if (err) {
       res.render("signup", { error: "Something went wrong" });
       return;
     }
 
     res.redirect("/login");
-  });
+  }); */
 });
 
 app.get("/login", function (req, res) {
@@ -151,7 +158,24 @@ app.post("/login", function (req, res) {
   const username = req.body.username;
   const password = req.body.password;
 
-  getAllUsers(function (err, data) {
+  // if suing findOne then result will be null or the user object
+  // if using find then result will be an array of user objects
+  UserModel.findOne({ username: username, password: password })
+    .then(function (user) {
+      if (user) {
+        req.session.isLoggedIn = true;
+        req.session.username = username;
+        req.session.profilePic = user.profilePic;
+        res.redirect("/");
+        return;
+      }
+      res.render("login", { error: "Invalid username or password" });
+    })
+    .catch(function (err) {
+      res.render("login", { error: "Something went wrong" });
+    });
+
+  /* getAllUsers(function (err, data) {
     if (err) {
       res.render("login", { error: "Something went wrong" });
       return;
@@ -170,12 +194,20 @@ app.post("/login", function (req, res) {
     }
 
     res.render("login", { error: "Invalid username or password" });
-  });
+  }); */
 });
 
-app.listen(3000, function () {
-  console.log("server on port 3000");
-});
+db.init()
+  .then(function () {
+    console.log("db connected");
+
+    app.listen(3000, function () {
+      console.log("server on port 3000");
+    });
+  })
+  .catch(function (err) {
+    console.log(err);
+  });
 
 function readAllTodos(callback) {
   fs.readFile("./treasure.mp4", "utf-8", function (err, data) {
